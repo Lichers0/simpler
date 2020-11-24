@@ -49,7 +49,7 @@ module Simpler
     end
 
     def view
-      "#{@request.env['simpler.template'] || [controller_name, controller_action].join('/')}.html.erb"
+      "#{[controller_name, controller_action].join('/')}.html.erb"
     end
 
     def response_status
@@ -93,13 +93,8 @@ module Simpler
     end
 
     def render(template)
-      case template
-      when String
-        @request.env['simpler.template'] = template
-      when Hash
-        key = template.keys.first
-        send("#{key}_template", template[key])
-      end
+      key = template.keys.first
+      send("#{key}_template", template[key])
     end
 
     def plain_template(data)
