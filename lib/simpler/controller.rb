@@ -26,7 +26,7 @@ module Simpler
     end
 
     def status(status)
-      @response.status = status
+      @response.status = Integer(status)
     end
 
     def headers
@@ -92,18 +92,19 @@ module Simpler
       @request.params.merge(route_params)
     end
 
-    def render(params)
-      case params
+    def render(template)
+      case template
       when String
-        @request.env['simpler.template'] = params
+        @request.env['simpler.template'] = template
       when Hash
-        if params[:plain]
-          @request.env['simpler.type_render'] = :plain
-          headers['Content-Type'] = 'text/plain'
-          @request.env['simpler.plain'] = params[:plain]
-        end
+        key = template.keys.first
+        send("#{key}_template", template[key])
       end
     end
 
+    def plain_template(data)
+      @request.env['simpler.type_render'] = :plain
+      @request.env['simpler.plain'] = data
+    end
   end
 end

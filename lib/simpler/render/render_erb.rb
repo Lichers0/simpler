@@ -1,7 +1,7 @@
-require_relative 'render'
+require_relative 'abstract_render'
 
 module Simpler
-  class RenderErb < Render
+  class RenderErb < AbstractRender
 
     VIEW_BASE_PATH = 'app/views'.freeze
 

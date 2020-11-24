@@ -1,15 +1,15 @@
 require 'logger'
+require 'dotenv/load'
 
 module Simpler
   class AppLogger
-    def initialize(app, **options)
+    def initialize(app)
       @app = app
-      @logger = Logger.new(options[:logfile])
+      @logger = Logger.new(ENV['LOGFILE'] || STDOUT)
     end
 
     def call(env)
       status, header, body = @app.call(env)
-      request = Rack::Request.new(env)
 
       save_log_info(env)
       response = Rack::Response.new(body, status, header)
@@ -17,10 +17,11 @@ module Simpler
     end
 
     def save_log_info(env)
-      @logger.info(env['Simpler.Log.Request'])
-      @logger.info(env['Simpler.Log.Handler'])
-      @logger.info(env['Simpler.Log.Parameters'])
-      @logger.info(env['Simpler.Log.Response'])
+      log_info = "\n#{env['Simpler.Log.Request']}\n"
+      log_info += "#{env['Simpler.Log.Handler']}\n"
+      log_info += "#{env['Simpler.Log.Parameters']}\n"
+      log_info += "#{env['Simpler.Log.Response']}\n"
+      @logger.info(log_info)
     end
   end
 end

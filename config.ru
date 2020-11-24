@@ -2,5 +2,5 @@ require_relative 'config/environment'
 require_relative 'lib/simpler/app_logger'
 
 use Rack::Reloader
-use Simpler::AppLogger, logfile: Simpler.root.join('log/simpler.log')
+use Simpler::AppLogger
 run Simpler.application

@@ -12,7 +12,7 @@ class TestsController < Simpler::Controller
     render plain: "test"
   end
 
-  def show
+  def show_param_id
     render plain: "show #{params[:id]}"
   end
 end

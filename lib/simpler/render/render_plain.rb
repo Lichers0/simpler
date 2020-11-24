@@ -1,6 +1,6 @@
-require_relative 'render'
+require_relative 'abstract_render'
 module Simpler
-  class RenderPlain < Render
+  class RenderPlain < AbstractRender
     def call(binding)
       @env['simpler.plain']
     end
