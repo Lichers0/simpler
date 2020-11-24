@@ -8,21 +8,65 @@ module Simpler
     def initialize(env)
       @name = extract_name
       @request = Rack::Request.new(env)
+      @request.env['simpler.type_render'] = :erb
       @response = Rack::Response.new
+      set_default_headers
     end
 
     def make_response(action)
       @request.env['simpler.controller'] = self
       @request.env['simpler.action'] = action
 
-      set_default_headers
       send(action)
       write_response
+
+      create_log_info
 
       @response.finish
     end
 
+    def status(status)
+      @response.status = Integer(status)
+    end
+
+    def headers
+      @response.headers
+    end
+
     private
+
+    def create_log_info
+      @request.env['Simpler.Log.Request'] =
+        "Request: #{@request.request_method} #{@request.fullpath}"
+
+      @request.env['Simpler.Log.Handler'] =
+        "Handler: #{controller_name}##{controller_action}"
+
+      @request.env['Simpler.Log.Parameters'] = "Parameters: #{params}"
+
+      @request.env['Simpler.Log.Response'] =
+        "Response: #{response_status} [#{content_type}] #{view}"
+    end
+
+    def view
+      "#{[controller_name, controller_action].join('/')}.html.erb"
+    end
+
+    def response_status
+      Rack::Utils::HTTP_STATUS_CODES[@response.status]
+    end
+
+    def content_type
+      headers['Content-Type']
+    end
+
+    def controller_name
+      self.class.name
+    end
+
+    def controller_action
+      @request.env['simpler.action']
+    end
 
     def extract_name
       self.class.name.match('(?<name>.+)Controller')[:name].downcase
@@ -43,12 +87,19 @@ module Simpler
     end
 
     def params
-      @request.params
+      route_params = @request.env['Simpler.Route.Params']
+      route_params ||= {}
+      @request.params.merge(route_params)
     end
 
     def render(template)
-      @request.env['simpler.template'] = template
+      key = template.keys.first
+      send("#{key}_template", template[key])
     end
 
+    def plain_template(data)
+      @request.env['simpler.type_render'] = :plain
+      @request.env['simpler.plain'] = data
+    end
   end
 end
