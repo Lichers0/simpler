@@ -5,6 +5,3 @@ class Simpler::Render
 
   def call(binding); end
 end
-
-
-
